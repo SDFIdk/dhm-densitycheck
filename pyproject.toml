@@ -1,0 +1,12 @@
+[project]
+name = "dhm-densitycheck"
+version = "0.1.0"
+authors = [
+    {name = "Danish Agency for Data Supply and Infrastructure (SDFI)", email = "sdfi@sdfi.dk"},
+]
+description = "Tool to check point density of point cloud deliverables"
+readme = "README.md"
+license = {file = "LICENSE"}
+
+[project.scripts]
+point_density = "densitycheck.cli:main"

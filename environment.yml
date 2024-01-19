@@ -1,0 +1,9 @@
+name: densitycheck-dev
+channels:
+  - conda-forge
+dependencies:
+  - gdal
+  - laspy
+  - numpy
+  - pyproj
+  - pytest
