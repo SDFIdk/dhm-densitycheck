@@ -4,6 +4,8 @@ from osgeo import gdal, osr
 gdal.UseExceptions()
 osr.UseExceptions()
 
+NODATA_VALUE = -9999
+
 def get_density(las_data, cell_size):
     input_points = las_data.points
 
@@ -59,7 +61,7 @@ def get_density(las_data, cell_size):
     dataset.SetGeoTransform(raster_geotransform)
     dataset.SetProjection(output_spatialreference.ExportToWkt())
     band = dataset.GetRasterBand(1)
-    band.SetNoDataValue(0)
+    band.SetNoDataValue(NODATA_VALUE)
     band.WriteArray(cell_densities)
 
     return dataset

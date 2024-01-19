@@ -1,7 +1,7 @@
 from osgeo import osr
 import numpy as np
 
-from densitycheck.density import get_density
+from densitycheck.density import get_density, NODATA_VALUE
 
 osr.UseExceptions()
 
@@ -17,5 +17,5 @@ def test_get_density(las_data, osr_spatialreference):
     assert output_srs.IsSame(osr_spatialreference)
     np.testing.assert_allclose(output_geotransform, [600000.0, 500.0, 0.0, 6201000.0, 0.0, -500.0])
     assert (dataset.RasterXSize, dataset.RasterYSize) == (2, 2)
-    assert output_nodata_value == 0
+    assert output_nodata_value == NODATA_VALUE
     np.testing.assert_allclose(output_array, [[4e-6, 8e-6], [0, 4e-6]])
