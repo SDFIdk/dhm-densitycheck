@@ -59,6 +59,7 @@ def get_density(las_data, cell_size):
     dataset.SetGeoTransform(raster_geotransform)
     dataset.SetProjection(output_spatialreference.ExportToWkt())
     band = dataset.GetRasterBand(1)
+    band.SetNoDataValue(0)
     band.WriteArray(cell_densities)
 
     return dataset
