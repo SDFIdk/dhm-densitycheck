@@ -1,6 +1,8 @@
 import pytest
 
 import laspy
+from laspy.header import Version
+from laspy.point.format import PointFormat
 import numpy as np
 import pyproj
 from osgeo import gdal, osr
@@ -29,13 +31,21 @@ def pointcloud_xyz():
         ])
     return offset + coords
 
+@pytest.fixture(params=[
+     (Version(1, 2), PointFormat(1)),
+     (Version(1, 4), PointFormat(6)),
+])
+def las_header(request):
+     version, point_format = request.param
+     return laspy.LasHeader(version=version, point_format=point_format)
+
 @pytest.fixture()
-def las_data(pointcloud_xyz, pyproj_crs):
-     header = laspy.LasHeader(version="1.4", point_format=6)
-     header.offsets = [600000.0, 6200000.0, 0.0]
-     header.scales = [0.001, 0.001, 0.001]
-     header.add_crs(pyproj_crs)
-     las = laspy.LasData(header=header)
+def las_data(las_header, pointcloud_xyz, pyproj_crs):
+     las_header.offsets = [600000.0, 6200000.0, 0.0]
+     las_header.scales = [0.001, 0.001, 0.001]
+     las_header.add_crs(pyproj_crs)
+
+     las = laspy.LasData(header=las_header)
      las.x = pointcloud_xyz[:,0]
      las.y = pointcloud_xyz[:,1]
      las.z = pointcloud_xyz[:,2]
