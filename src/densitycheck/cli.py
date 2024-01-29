@@ -1,7 +1,7 @@
 from osgeo import gdal
 import laspy
 
-from densitycheck.density import get_density
+from densitycheck.density import get_density, ReturnKind
 
 import argparse
 
@@ -21,5 +21,5 @@ def main():
     cell_size = input_arguments.cell_size
 
     output_driver = gdal.GetDriverByName('COG')
-    temp_dataset = get_density(las_data, cell_size)
+    temp_dataset = get_density(las_data, cell_size, ReturnKind.ALL)
     output_driver.CreateCopy(output_path, temp_dataset)

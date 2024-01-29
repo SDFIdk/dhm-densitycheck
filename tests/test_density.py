@@ -1,12 +1,12 @@
 from osgeo import osr
 import numpy as np
 
-from densitycheck.density import get_density, NODATA_VALUE
+from densitycheck.density import get_density, ReturnKind, NODATA_VALUE
 
 osr.UseExceptions()
 
 def test_get_density(las_data, osr_spatialreference):
-    dataset = get_density(las_data, 500.0)
+    dataset = get_density(las_data, 500.0, ReturnKind.ALL)
     
     output_srs = osr.SpatialReference(dataset.GetProjection())
     output_geotransform = dataset.GetGeoTransform()
