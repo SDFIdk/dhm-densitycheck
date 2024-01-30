@@ -7,6 +7,8 @@ import numpy as np
 import pyproj
 from osgeo import gdal, osr
 
+from densitycheck.density import ReturnKind
+
 gdal.UseExceptions()
 osr.UseExceptions()
 
@@ -21,15 +23,12 @@ def osr_spatialreference():
     return srs
 
 @pytest.fixture()
-def pointcloud_xyz():
-    offset = np.array([[600000.0, 6200000.0, 0.0]])
-    coords = np.array([
-        [100.0, 900.0, 20.0],
-        [600.0, 900.0, 30.0],
-        [700.0, 800.0, 20.0],
-        [800.0, 250.0, 10.0]
-        ])
-    return offset + coords
+def tile_ll():
+     return np.array([600000.0, 6200000.0, 0.0])
+
+@pytest.fixture(params=[kind for kind in ReturnKind])
+def return_kind(request):
+     return request.param
 
 @pytest.fixture(params=[
      (Version(1, 2), PointFormat(1)),
@@ -40,15 +39,21 @@ def las_header(request):
      return laspy.LasHeader(version=version, point_format=point_format)
 
 @pytest.fixture()
-def las_data(las_header, pointcloud_xyz, pyproj_crs):
+def las_data(las_header, tile_ll, pyproj_crs):
      las_header.offsets = [600000.0, 6200000.0, 0.0]
      las_header.scales = [0.001, 0.001, 0.001]
      las_header.add_crs(pyproj_crs)
 
      las = laspy.LasData(header=las_header)
-     las.x = pointcloud_xyz[:,0]
-     las.y = pointcloud_xyz[:,1]
-     las.z = pointcloud_xyz[:,2]
+     las.xyz = tile_ll[np.newaxis, :] + np.array([
+        [100.0, 900.0, 20.0],
+        [600.0, 900.0, 30.0],
+        [700.0, 800.0, 20.0],
+        [800.0, 250.0, 10.0]
+     ])
+
+     las.return_number = np.array([1, 1, 2, 2])
+     las.number_of_returns = np.array([1, 3, 3, 2])
 
      return las
 
@@ -59,3 +64,15 @@ def gdal_driver():
 @pytest.fixture()
 def dataset(gdal_driver):
      gdal_driver.Create('point_density')
+
+@pytest.fixture()
+def expected_raster(return_kind):
+     match return_kind:
+          case ReturnKind.ALL:
+               grid = np.array([[4e-6, 8e-6], [0, 4e-6]])
+          case ReturnKind.FIRST:
+               grid = np.array([[4e-6, 4e-6]])
+          case ReturnKind.LAST:
+               grid = np.array([[4e-6, 0], [0, 4e-6]])
+
+     return grid
