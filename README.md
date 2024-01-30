@@ -27,14 +27,15 @@ per raster cell. The spatial extent is automatically computed. The command to
 use is:
 
 ```
-point_density [-h] [--cell-size CELL_SIZE] input_las output_raster
+point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] input_las output_raster
 ```
 
 | Parameter | Description |
 | --------- | ----------- |
 | `input_las` | Path to `laspy`-readable pointcloud file (LAS, LAZ, COPC) |
 | `output_raster` | Path to desired output raster file. Will be written as COG (Cloud-Optimized GeoTIFF) |
-| `--cell-size` | Size of cells in output raster in georeferenced units (commonly meters) |
+| `--cell-size CELL_SIZE` | Size of cells in output raster in georeferenced units (commonly meters) |
+| `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers |
 | `-h` | Print help and exit |
 
 ## Example

@@ -5,8 +5,8 @@ from densitycheck.density import get_density, NODATA_VALUE
 
 osr.UseExceptions()
 
-def test_get_density(las_data, osr_spatialreference):
-    dataset = get_density(las_data, 500.0)
+def test_get_density(las_data, expected_raster, return_kind, osr_spatialreference):
+    dataset = get_density(las_data, 500.0, return_kind)
     
     output_srs = osr.SpatialReference(dataset.GetProjection())
     output_geotransform = dataset.GetGeoTransform()
@@ -16,6 +16,6 @@ def test_get_density(las_data, osr_spatialreference):
 
     assert output_srs.IsSame(osr_spatialreference)
     np.testing.assert_allclose(output_geotransform, [600000.0, 500.0, 0.0, 6201000.0, 0.0, -500.0])
-    assert (dataset.RasterXSize, dataset.RasterYSize) == (2, 2)
+    assert (dataset.RasterYSize, dataset.RasterXSize) == expected_raster.shape
     assert output_nodata_value == NODATA_VALUE
-    np.testing.assert_allclose(output_array, [[4e-6, 8e-6], [0, 4e-6]])
+    np.testing.assert_allclose(output_array, expected_raster)

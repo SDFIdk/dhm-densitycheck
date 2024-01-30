@@ -1,26 +1,33 @@
 import numpy as np
 from osgeo import gdal, osr
 
+from enum import Enum, auto
+
 gdal.UseExceptions()
 osr.UseExceptions()
 
 NODATA_VALUE = -9999
 
-def get_density(las_data, cell_size):
+class ReturnKind(Enum):
+    ALL = auto()
+    FIRST = auto()
+    LAST = auto()
+
+def get_density(las_data, cell_size, return_kind: ReturnKind):
     input_points = las_data.points
 
     input_crs = las_data.header.parse_crs()
     
-    # TODO handle filtering by return number
-    # Grab first returns
-    #relevant_indices = input_points.return_number == 1
+    match return_kind:
+        case ReturnKind.ALL:
+            relevant_points = input_points
+        case ReturnKind.FIRST:
+            relevant_indices = input_points.return_number == 1
+            relevant_points = input_points[relevant_indices]
+        case ReturnKind.LAST:
+            relevant_indices = input_points.return_number == input_points.number_of_returns
+            relevant_points = input_points[relevant_indices]
 
-    # Grab last returns
-    #relevant_indices = input_points.return_number == input_points.number_of_returns
-
-    #relevant_points = input_points[relevant_indices]
-
-    relevant_points = input_points
     relevant_xy = np.column_stack([relevant_points.x, relevant_points.y])
 
     relevant_xy_int = (relevant_xy // cell_size).astype(int)
