@@ -76,3 +76,14 @@ def expected_raster(return_kind):
                grid = np.array([[4e-6, 0], [0, 4e-6]])
 
      return grid
+
+@pytest.fixture()
+def input_filename(tmp_path, las_data):
+     filename = tmp_path / "input.las"
+     las_data.write(filename)
+     return filename
+
+@pytest.fixture()
+def output_filename(tmp_path):
+     filename = tmp_path / "output.tif"
+     return filename
