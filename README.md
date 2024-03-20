@@ -27,7 +27,7 @@ per raster cell. The spatial extent is automatically computed. The command to
 use is:
 
 ```
-point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] input_las output_raster
+point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclude EXCLUDE] input_las output_raster
 ```
 
 | Parameter | Description |
