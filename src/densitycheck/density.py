@@ -13,7 +13,7 @@ class ReturnKind(Enum):
     FIRST = auto()
     LAST = auto()
 
-def get_density(las_data, cell_size, return_kind: ReturnKind):
+def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
     input_points = las_data.points
 
     input_crs = las_data.header.parse_crs()
@@ -57,13 +57,35 @@ def get_density(las_data, cell_size, return_kind: ReturnKind):
 
     cell_area = cell_size**2
 
-    cell_point_counts = cell_point_counts_flat.reshape(num_rows, num_cols)
-    cell_densities = cell_point_counts / cell_area
-
     output_spatialreference = osr.SpatialReference()
     output_spatialreference.ImportFromWkt(input_crs.to_wkt())
 
     driver = gdal.GetDriverByName('MEM')
+
+    if mask_layer is None:
+        cell_areas = cell_area
+    else:
+        mask_dataset = driver.Create('mask_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
+        mask_dataset.SetGeoTransform(raster_geotransform)
+        mask_dataset.SetProjection(output_spatialreference.ExportToWkt())
+        mask_band = mask_dataset.GetRasterBand(1)
+        mask_band.WriteArray(cell_area * np.ones((num_rows, num_cols)))
+        gdal.RasterizeLayer(
+            mask_dataset,
+            [1], # band 1
+            mask_layer,
+            burn_values=[0],
+            options=[
+                'ALL_TOUCHED=TRUE',
+            ]
+        )
+        cell_areas = mask_band.ReadAsArray()
+
+    cell_point_counts = cell_point_counts_flat.reshape(num_rows, num_cols)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        cell_densities = cell_point_counts / cell_areas
+    cell_densities[~np.isfinite(cell_densities)] = NODATA_VALUE
+
     dataset = driver.Create('density_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
     dataset.SetGeoTransform(raster_geotransform)
     dataset.SetProjection(output_spatialreference.ExportToWkt())

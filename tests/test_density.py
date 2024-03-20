@@ -5,9 +5,14 @@ from densitycheck.density import get_density, NODATA_VALUE
 
 osr.UseExceptions()
 
-def test_get_density(las_data, expected_raster, return_kind, osr_spatialreference):
-    dataset = get_density(las_data, 500.0, return_kind)
-    
+def test_get_density(las_data, expected_raster, return_kind, osr_spatialreference, mask_datasrc_opt):
+    if mask_datasrc_opt is None:
+        mask_layer = None
+    else:
+        mask_layer = mask_datasrc_opt.GetLayer()
+
+    dataset = get_density(las_data, 500.0, return_kind, mask_layer=mask_layer)
+
     output_srs = osr.SpatialReference(dataset.GetProjection())
     output_geotransform = dataset.GetGeoTransform()
     output_band = dataset.GetRasterBand(1)
