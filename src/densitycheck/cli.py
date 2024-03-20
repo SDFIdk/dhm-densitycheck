@@ -14,7 +14,7 @@ def main():
     argument_parser.add_argument('output_raster', type=str, help='path to desired output raster (COG)')
     argument_parser.add_argument('--cell-size', type=float, default=1.0, help='cell size in georeferenced units')
     argument_parser.add_argument('--returns', type=str, default='ALL', choices=[kind.name for kind in ReturnKind], help='return number of points to consider')
-    argument_parser.add_argument('--mask', type=str, default=None, help='path to exclusion mask (OGR-readable datasource)')
+    argument_parser.add_argument('--exclude', type=str, default=None, help='path to exclusion mask (OGR-readable datasource)')
 
     input_arguments = argument_parser.parse_args()
 
@@ -22,7 +22,7 @@ def main():
     output_path = input_arguments.output_raster
     cell_size = input_arguments.cell_size
     return_kind = ReturnKind[input_arguments.returns]
-    mask_path = input_arguments.mask
+    mask_path = input_arguments.exclude
 
     if mask_path is None:
         mask_layer = None

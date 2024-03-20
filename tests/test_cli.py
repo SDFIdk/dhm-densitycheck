@@ -18,7 +18,7 @@ def test_cli_full(input_filename, output_filename, return_kind, expected_raster,
     args = [input_filename, output_filename, '--cell-size', '500.0', '--returns', return_kind.name]
 
     if mask_file is not None:
-        args += ['--mask', mask_file]
+        args += ['--exclude', mask_file]
 
     call_point_density(args)
 
