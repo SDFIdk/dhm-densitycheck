@@ -14,8 +14,13 @@ def call_point_density(args):
 def test_cli_help():
     call_point_density(['-h'])
 
-def test_cli_full(input_filename, output_filename, return_kind, expected_raster, osr_spatialreference):
-    call_point_density([input_filename, output_filename, '--cell-size', '500.0', '--returns', return_kind.name])
+def test_cli_full(input_filename, output_filename, return_kind, expected_raster, osr_spatialreference, mask_file):
+    args = [input_filename, output_filename, '--cell-size', '500.0', '--returns', return_kind.name]
+
+    if mask_file is not None:
+        args += ['--exclude', mask_file]
+
+    call_point_density(args)
 
     output_dataset = gdal.Open(output_filename)
     output_srs = osr.SpatialReference(output_dataset.GetProjection())
