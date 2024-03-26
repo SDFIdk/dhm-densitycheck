@@ -1,6 +1,7 @@
 import numpy as np
 from osgeo import gdal, osr
 
+from collections import namedtuple
 from enum import Enum, auto
 
 gdal.UseExceptions()
@@ -12,6 +13,9 @@ class ReturnKind(Enum):
     ALL = auto()
     FIRST = auto()
     LAST = auto()
+
+Stats = namedtuple('Stats', ['min', 'max', 'mean', 'median', 'std', 'var'])
+DensityResult = namedtuple('DensityResult', ['dataset', 'stats'])
 
 def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
     input_points = las_data.points
@@ -84,7 +88,17 @@ def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
     cell_point_counts = cell_point_counts_flat.reshape(num_rows, num_cols)
     with np.errstate(divide='ignore', invalid='ignore'):
         cell_densities = cell_point_counts / cell_areas
+    valid_densities_unrolled = cell_densities[np.isfinite(cell_densities)].reshape((-1,))
     cell_densities[~np.isfinite(cell_densities)] = NODATA_VALUE
+
+    stat_min = np.min(valid_densities_unrolled)
+    stat_max = np.max(valid_densities_unrolled)
+    stat_median = np.median(valid_densities_unrolled)
+    stat_mean = np.mean(valid_densities_unrolled)
+    stat_std = np.std(valid_densities_unrolled)
+    stat_var = np.var(valid_densities_unrolled)
+
+    stats = Stats(min=stat_min, max=stat_max, mean=stat_mean, median=stat_median, std=stat_std, var=stat_var)
 
     dataset = driver.Create('density_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
     dataset.SetGeoTransform(raster_geotransform)
@@ -93,4 +107,5 @@ def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
     band.SetNoDataValue(NODATA_VALUE)
     band.WriteArray(cell_densities)
 
-    return dataset
+    result = DensityResult(dataset=dataset, stats=stats)
+    return result

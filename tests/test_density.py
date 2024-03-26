@@ -5,13 +5,15 @@ from densitycheck.density import get_density, NODATA_VALUE
 
 osr.UseExceptions()
 
-def test_get_density(las_data, expected_raster, return_kind, osr_spatialreference, mask_datasrc_opt):
+def test_get_density(las_data, expected_raster, expected_stats, return_kind, osr_spatialreference, mask_datasrc_opt):
     if mask_datasrc_opt is None:
         mask_layer = None
     else:
         mask_layer = mask_datasrc_opt.GetLayer()
 
-    dataset = get_density(las_data, 500.0, return_kind, mask_layer=mask_layer)
+    density_result = get_density(las_data, 500.0, return_kind, mask_layer=mask_layer)
+    dataset = density_result.dataset
+    output_stats = density_result.stats
 
     output_srs = osr.SpatialReference(dataset.GetProjection())
     output_geotransform = dataset.GetGeoTransform()
@@ -24,3 +26,10 @@ def test_get_density(las_data, expected_raster, return_kind, osr_spatialreferenc
     assert (dataset.RasterYSize, dataset.RasterXSize) == expected_raster.shape
     assert output_nodata_value == NODATA_VALUE
     np.testing.assert_allclose(output_array, expected_raster)
+
+    assert output_stats.min == expected_stats.min
+    assert output_stats.max == expected_stats.max
+    assert output_stats.mean == expected_stats.mean
+    assert output_stats.median == expected_stats.median
+    assert output_stats.std == expected_stats.std
+    assert output_stats.var == expected_stats.var

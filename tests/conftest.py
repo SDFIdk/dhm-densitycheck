@@ -7,7 +7,7 @@ import numpy as np
 import pyproj
 from osgeo import gdal, ogr, osr
 
-from densitycheck.density import ReturnKind, NODATA_VALUE
+from densitycheck.density import Stats, ReturnKind, NODATA_VALUE
 
 gdal.UseExceptions()
 ogr.UseExceptions()
@@ -156,6 +156,22 @@ def expected_raster(return_kind, mask_datasrc_opt):
                case ReturnKind.LAST:
                     grid = np.array([[4e-6, NODATA_VALUE], [NODATA_VALUE, 4e-6]])
      return grid
+
+@pytest.fixture()
+def expected_stats(expected_raster):
+     unrolled_raster = expected_raster.reshape((-1,))
+     unrolled_raster_valid = unrolled_raster[unrolled_raster != NODATA_VALUE]
+
+     stat_min = np.min(unrolled_raster_valid)
+     stat_max = np.max(unrolled_raster_valid)
+     stat_mean = np.mean(unrolled_raster_valid)
+     stat_median = np.median(unrolled_raster_valid)
+     stat_std = np.std(unrolled_raster_valid)
+     stat_var = np.var(unrolled_raster_valid)
+
+     stats = Stats(min=stat_min, max=stat_max, mean=stat_mean, median=stat_median, std=stat_std, var=stat_var)
+
+     return stats
 
 @pytest.fixture()
 def input_filename(tmp_path, las_data):
