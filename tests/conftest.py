@@ -36,11 +36,25 @@ osr.UseExceptions()
 def pyproj_crs():
      return pyproj.CRS("EPSG:7416")
 
+@pytest.fixture(params=[False, True])
+def pyproj_crs_opt(request, pyproj_crs):
+     if request.param:
+          return pyproj_crs
+     else:
+          return None
+
 @pytest.fixture()
 def osr_spatialreference():
     srs = osr.SpatialReference()
     srs.ImportFromEPSG(7416)
     return srs
+
+@pytest.fixture()
+def osr_spatialreference_opt(osr_spatialreference, pyproj_crs_opt):
+     if pyproj_crs_opt is None:
+          return None
+     else:
+          return osr_spatialreference
 
 @pytest.fixture()
 def tile_ll():
@@ -59,10 +73,11 @@ def las_header(request):
      return laspy.LasHeader(version=version, point_format=point_format)
 
 @pytest.fixture()
-def las_data(las_header, tile_ll, pyproj_crs):
+def las_data(las_header, tile_ll, pyproj_crs_opt):
      las_header.offsets = [600000.0, 6200000.0, 0.0]
      las_header.scales = [0.001, 0.001, 0.001]
-     las_header.add_crs(pyproj_crs)
+     if pyproj_crs_opt is not None:
+          las_header.add_crs(pyproj_crs_opt)
 
      las = laspy.LasData(header=las_header)
      las.xyz = tile_ll[np.newaxis, :] + np.array([

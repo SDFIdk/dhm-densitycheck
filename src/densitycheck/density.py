@@ -61,8 +61,9 @@ def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
 
     cell_area = cell_size**2
 
-    output_spatialreference = osr.SpatialReference()
-    output_spatialreference.ImportFromWkt(input_crs.to_wkt())
+    if input_crs is not None:
+        output_spatialreference = osr.SpatialReference()
+        output_spatialreference.ImportFromWkt(input_crs.to_wkt())
 
     driver = gdal.GetDriverByName('MEM')
 
@@ -71,7 +72,8 @@ def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
     else:
         mask_dataset = driver.Create('mask_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
         mask_dataset.SetGeoTransform(raster_geotransform)
-        mask_dataset.SetProjection(output_spatialreference.ExportToWkt())
+        if input_crs is not None:
+            mask_dataset.SetProjection(output_spatialreference.ExportToWkt())
         mask_band = mask_dataset.GetRasterBand(1)
         mask_band.WriteArray(cell_area * np.ones((num_rows, num_cols)))
         gdal.RasterizeLayer(
@@ -102,7 +104,8 @@ def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
 
     dataset = driver.Create('density_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
     dataset.SetGeoTransform(raster_geotransform)
-    dataset.SetProjection(output_spatialreference.ExportToWkt())
+    if input_crs is not None:
+        dataset.SetProjection(output_spatialreference.ExportToWkt())
     band = dataset.GetRasterBand(1)
     band.SetNoDataValue(NODATA_VALUE)
     band.WriteArray(cell_densities)
