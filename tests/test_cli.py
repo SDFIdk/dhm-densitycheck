@@ -15,7 +15,7 @@ def test_cli_help():
     call_point_density(['-h'])
 
 def test_cli_full(input_filename, output_filename, return_kind, expected_raster, osr_spatialreference, mask_file):
-    args = [input_filename, output_filename, '--cell-size', '500.0', '--returns', return_kind.name]
+    args = [input_filename, output_filename, '--cell-size', '500.0', '--returns', return_kind.name, '--print-stats']
 
     if mask_file is not None:
         args += ['--exclude', mask_file]

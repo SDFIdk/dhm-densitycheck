@@ -27,7 +27,7 @@ per raster cell. The spatial extent is automatically computed. The command to
 use is:
 
 ```
-point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclude EXCLUDE] input_las output_raster
+point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclude EXCLUDE] [--print-stats] input_las output_raster
 ```
 
 | Parameter | Description |
@@ -37,6 +37,7 @@ point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclu
 | `--cell-size CELL_SIZE` | Size of cells in output raster in georeferenced units (commonly meters) |
 | `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers |
 | `--exclude EXCLUDE` | Optional exclusion mask for lakes etc. Must be an OGR-readable datasource with a single layer |
+| `--print-stats` | Print density statistics to standard output |
 | `-h` | Print help and exit |
 
 ## Example
