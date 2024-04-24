@@ -37,7 +37,7 @@ point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclu
 | `--cell-size CELL_SIZE` | Size of cells in output raster in georeferenced units (commonly meters) |
 | `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers |
 | `--exclude EXCLUDE` | Optional exclusion mask for lakes etc. Must be an OGR-readable datasource with a single layer |
-| `--print-stats` | Print density statistics to standard output |
+| `--print-stats` | Print density statistics to standard output. Can be piped to output file |
 | `-h` | Print help and exit |
 
 ## Example
@@ -46,5 +46,5 @@ This will create a COG raster with 10-meter cells, containing number of points
 per square meter in each cell:
 
 ```
-point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --exclude dk_lakes.gpkg
+point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --exclude dk_lakes.gpkg --print-stats >1km_1234_567.txt
 ```
