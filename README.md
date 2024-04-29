@@ -3,11 +3,14 @@ Tool to check point density of point cloud deliverables.
 
 ## Installation
 
-An appropriate environment (here named `densitycheck`) can be created with:
+An appropriate conda environment (here named `densitycheck`) can be created
+with:
 
 ```
 conda env create -n densitycheck -f environment.yml
 ```
+
+The following assumes that this environment is activated.
 
 The tool supports editable installation using `pip`. To install it this way,
 use the following command in the root directory:
@@ -34,8 +37,8 @@ point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclu
 | --------- | ----------- |
 | `input_las` | Path to `laspy`-readable pointcloud file (LAS, LAZ, COPC) |
 | `output_raster` | Path to desired output raster file. Will be written as COG (Cloud-Optimized GeoTIFF) |
-| `--cell-size CELL_SIZE` | Size of cells in output raster in georeferenced units (commonly meters) |
-| `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers |
+| `--cell-size CELL_SIZE` | Size of cells in output raster in georeferenced units (commonly meters). Default: 1.0 |
+| `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers. Note that some pointcloud software regards "only" returns as distinct from "first" and "last", which is not the case here (i.e., "only" returns count both as "first" and "last" with this tool). |
 | `--exclude EXCLUDE` | Optional exclusion mask for lakes etc. Must be an OGR-readable datasource with a single layer |
 | `--print-stats` | Print density statistics to standard output |
 | `-h` | Print help and exit |
@@ -47,4 +50,11 @@ per square meter in each cell:
 
 ```
 point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --exclude dk_lakes.gpkg
+```
+
+Same, but with output statistics printed to stdout and redirected to a text
+file:
+
+```
+point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --exclude dk_lakes.gpkg > 1km_1234_567_stats.txt
 ```
