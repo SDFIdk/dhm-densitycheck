@@ -11,7 +11,7 @@ def test_get_density(las_data, return_kind, expected_raster, expected_stats, osr
     else:
         mask_layer = mask_datasrc_opt.GetLayer()
 
-    density_result = get_density(las_data, 500.0, return_kind, mask_layer=mask_layer)
+    density_result = get_density(las_data, 500.0, return_kind, include_layer=None, exclude_layer=mask_layer)
     dataset = density_result.dataset
     output_stats = density_result.stats
 

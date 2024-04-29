@@ -20,6 +20,7 @@ def main():
     argument_parser.add_argument('output_raster', type=str, help='path to desired output raster (COG)')
     argument_parser.add_argument('--cell-size', type=float, default=1.0, help='cell size in georeferenced units')
     argument_parser.add_argument('--returns', type=str, default='ALL', choices=[kind.name for kind in ReturnKind], help='return number of points to consider')
+    argument_parser.add_argument('--include', type=str, default=None, help='path to inclusion mask (OGR-readable datasource)')
     argument_parser.add_argument('--exclude', type=str, default=None, help='path to exclusion mask (OGR-readable datasource)')
     argument_parser.add_argument('--print-stats', action='store_true', help='print cell statistics to stdout')
 
@@ -30,17 +31,24 @@ def main():
     output_path = input_arguments.output_raster
     cell_size = input_arguments.cell_size
     return_kind = ReturnKind[input_arguments.returns]
-    mask_path = input_arguments.exclude
+    include_mask_path = input_arguments.include
+    exclude_mask_path = input_arguments.exclude
     do_print_stats = input_arguments.print_stats
 
-    if mask_path is None:
-        mask_layer = None
+    if include_mask_path is None:
+        include_mask_layer = None
     else:
-        mask_datasrc = ogr.Open(mask_path)
-        mask_layer = mask_datasrc.GetLayer()
+        include_mask_datasrc = ogr.Open(include_mask_path)
+        include_mask_layer = include_mask_datasrc.GetLayer()
+
+    if exclude_mask_path is None:
+        exclude_mask_layer = None
+    else:
+        exclude_mask_datasrc = ogr.Open(exclude_mask_path)
+        exclude_mask_layer = exclude_mask_datasrc.GetLayer()
 
     output_driver = gdal.GetDriverByName('COG')
-    density_result = get_density(las_data, cell_size, return_kind, mask_layer=mask_layer)
+    density_result = get_density(las_data, cell_size, return_kind, include_layer=include_mask_layer, exclude_layer=exclude_mask_layer)
     temp_dataset = density_result.dataset
     stats = density_result.stats
     output_driver.CreateCopy(output_path, temp_dataset)

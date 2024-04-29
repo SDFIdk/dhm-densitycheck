@@ -39,6 +39,7 @@ point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclu
 | `output_raster` | Path to desired output raster file. Will be written as COG (Cloud-Optimized GeoTIFF) |
 | `--cell-size CELL_SIZE` | Size of cells in output raster in georeferenced units (commonly meters). Default: 1.0 |
 | `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers. Note that some pointcloud software regards "only" returns as distinct from "first" and "last" returns, which is not the case here (i.e., "only" returns count both as "first" and "last" with this tool). |
+| `--include INCLUDE` | Optional inclusion mask, intended for enforcing a particular tile footprint. Must be an OGR-readable datasource with a single layer |
 | `--exclude EXCLUDE` | Optional exclusion mask for lakes etc. Must be an OGR-readable datasource with a single layer |
 | `--print-stats` | Print density statistics to standard output |
 | `-h` | Print help and exit |
