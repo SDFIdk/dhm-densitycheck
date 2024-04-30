@@ -5,6 +5,8 @@ import pyproj
 from densitycheck.density import get_density, ReturnKind
 
 import argparse
+from collections import OrderedDict
+import json
 from pathlib import Path
 import sys
 
@@ -53,21 +55,7 @@ def main():
     stats = density_result.stats
     output_driver.CreateCopy(output_path, temp_dataset)
     if do_print_stats:
-        unit_name = 'unit' # Placeholder in case the file does not have a CRS, or we have a strange CRS with different units in x and y
-        input_crs = las_data.header.parse_crs()
-        if input_crs is not None:
-            axis_unit_names = (input_crs.axis_info[0].unit_name, input_crs.axis_info[1].unit_name)
-            if axis_unit_names[0] == axis_unit_names[1]:
-                unit_name = axis_unit_names[0] # 'metre', 'foot' etc.
+        stats_dict = stats._asdict()
+        stats_json = json.dumps(stats_dict, indent=2)
 
-        stat_lines = [
-            f'{input_basename} density statistics (points per square {unit_name}):',
-            f' ├─ min:    {stats.min:7.2f}',
-            f' ├─ max:    {stats.max:7.2f}',
-            f' ├─ mean:   {stats.mean:7.2f}',
-            f' ├─ median: {stats.median:7.2f}',
-            f' ├─ std:    {stats.std:7.2f}',
-            f' └─ var:    {stats.var:7.2f}',
-        ]
-
-        print('\n'.join(stat_lines))
+        print(stats_json)
