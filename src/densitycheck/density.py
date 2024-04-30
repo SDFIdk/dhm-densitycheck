@@ -17,7 +17,7 @@ class ReturnKind(Enum):
 Stats = namedtuple('Stats', ['min', 'max', 'mean', 'median', 'std', 'var'])
 DensityResult = namedtuple('DensityResult', ['dataset', 'stats'])
 
-def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
+def get_density(las_data, cell_size, return_kind: ReturnKind, include_layer=None, exclude_layer=None):
     input_points = las_data.points
 
     input_crs = las_data.header.parse_crs()
@@ -67,25 +67,40 @@ def get_density(las_data, cell_size, return_kind: ReturnKind, mask_layer=None):
 
     driver = gdal.GetDriverByName('MEM')
 
-    if mask_layer is None:
-        cell_areas = cell_area
-    else:
-        mask_dataset = driver.Create('mask_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
-        mask_dataset.SetGeoTransform(raster_geotransform)
+    cell_areas = cell_area * np.ones((num_rows, num_cols))
+
+    if include_layer is not None:
+        include_dataset = driver.Create('include_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
+        include_dataset.SetGeoTransform(raster_geotransform)
         if input_crs is not None:
-            mask_dataset.SetProjection(output_spatialreference.ExportToWkt())
-        mask_band = mask_dataset.GetRasterBand(1)
-        mask_band.WriteArray(cell_area * np.ones((num_rows, num_cols)))
+            include_dataset.SetProjection(output_spatialreference.ExportToWkt())
+        include_band = include_dataset.GetRasterBand(1)
+        include_band.WriteArray(np.zeros((num_rows, num_cols)))
         gdal.RasterizeLayer(
-            mask_dataset,
+            include_dataset,
             [1], # band 1
-            mask_layer,
+            include_layer,
+            burn_values=[1]
+        )
+        cell_areas *= include_band.ReadAsArray()
+
+    if exclude_layer is not None:
+        exclude_dataset = driver.Create('exclude_raster', num_cols, num_rows, 1, gdal.GDT_Float32)
+        exclude_dataset.SetGeoTransform(raster_geotransform)
+        if input_crs is not None:
+            exclude_dataset.SetProjection(output_spatialreference.ExportToWkt())
+        exclude_band = exclude_dataset.GetRasterBand(1)
+        exclude_band.WriteArray(np.ones((num_rows, num_cols)))
+        gdal.RasterizeLayer(
+            exclude_dataset,
+            [1], # band 1
+            exclude_layer,
             burn_values=[0],
             options=[
                 'ALL_TOUCHED=TRUE',
             ]
         )
-        cell_areas = mask_band.ReadAsArray()
+        cell_areas *= exclude_band.ReadAsArray()
 
     cell_point_counts = cell_point_counts_flat.reshape(num_rows, num_cols)
     with np.errstate(divide='ignore', invalid='ignore'):
