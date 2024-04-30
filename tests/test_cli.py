@@ -14,11 +14,14 @@ def call_point_density(args):
 def test_cli_help():
     call_point_density(['-h'])
 
-def test_cli_full(input_filename, output_filename, return_kind, expected_raster, osr_spatialreference_opt, mask_file):
+def test_cli_full(input_filename, output_filename, return_kind, expected_raster, osr_spatialreference_opt, include_file, exclude_file):
     args = [input_filename, output_filename, '--cell-size', '500.0', '--returns', return_kind.name, '--print-stats']
 
-    if mask_file is not None:
-        args += ['--exclude', mask_file]
+    if include_file is not None:
+        args += ['--include', include_file]
+
+    if exclude_file is not None:
+        args += ['--exclude', exclude_file]
 
     call_point_density(args)
 

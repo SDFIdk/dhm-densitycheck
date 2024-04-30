@@ -5,13 +5,18 @@ from densitycheck.density import get_density, NODATA_VALUE
 
 osr.UseExceptions()
 
-def test_get_density(las_data, return_kind, expected_raster, expected_stats, osr_spatialreference_opt, mask_datasrc_opt):
-    if mask_datasrc_opt is None:
-        mask_layer = None
+def test_get_density(las_data, return_kind, expected_raster, expected_stats, osr_spatialreference_opt, include_datasrc_opt, exclude_datasrc_opt):
+    if include_datasrc_opt is None:
+        include_layer = None
     else:
-        mask_layer = mask_datasrc_opt.GetLayer()
+        include_layer = include_datasrc_opt.GetLayer()
 
-    density_result = get_density(las_data, 500.0, return_kind, include_layer=None, exclude_layer=mask_layer)
+    if exclude_datasrc_opt is None:
+        exclude_layer = None
+    else:
+        exclude_layer = exclude_datasrc_opt.GetLayer()
+
+    density_result = get_density(las_data, 500.0, return_kind, include_layer=None, exclude_layer=exclude_layer)
     dataset = density_result.dataset
     output_stats = density_result.stats
 

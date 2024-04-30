@@ -93,10 +93,64 @@ def las_data(las_header, tile_ll, pyproj_crs_opt):
      return las
 
 @pytest.fixture()
-def mask_datasrc(tile_ll, osr_spatialreference):
+def include_datasrc(tile_ll, osr_spatialreference):
      driver = ogr.GetDriverByName('Memory')
-     datasrc = driver.CreateDataSource('mask')
-     layer = datasrc.CreateLayer('mask_polygons', osr_spatialreference, ogr.wkbPolygon)
+     datasrc = driver.CreateDataSource('include')
+     layer = datasrc.CreateLayer('include_polygons', osr_spatialreference, ogr.wkbPolygon)
+     layer_defn = layer.GetLayerDefn()
+     polygons_xyz = [
+          # np.array([
+          #      [500.0, 1500.0, 0.0],
+          #      [500.0, 500.0, 0.0],
+          #      [1500.0, 500.0, 0.0],
+          #      [1500.0, 1500.0, 0.0],
+          #      [500.0, 1500.0, 0.0],
+          # ]),
+          np.array([
+               [0.0, 0.0, 0.0],
+               [1000.0, 0.0, 0.0],
+               [1000.0, 1000.0, 0.0],
+               [0.0, 1000.0, 0.0],
+               [0.0, 0.0, 0.0],
+          ]),
+     ]
+
+     for polygon_xyz in polygons_xyz:
+          feature = ogr.Feature(layer_defn)
+          polygon = ogr.Geometry(ogr.wkbPolygon)
+          ring = ogr.Geometry(ogr.wkbLinearRing)
+          for xyz in polygon_xyz:
+               full_xyz = xyz + tile_ll
+
+               ring.AddPoint(*full_xyz)
+          polygon.AddGeometry(ring)
+          feature.SetGeometry(polygon)
+          layer.CreateFeature(feature)
+
+     return datasrc
+
+@pytest.fixture(params=[False, True])
+def include_datasrc_opt(request, include_datasrc):
+     if request.param:
+          return include_datasrc
+     else:
+          return None
+
+@pytest.fixture()
+def include_file(include_datasrc_opt, tmp_path):
+     if include_datasrc_opt is None:
+          return None
+     else:
+          output_driver = ogr.GetDriverByName('GPKG')
+          output_path = tmp_path / "include.gpkg"
+          output_driver.CopyDataSource(include_datasrc_opt, output_path)
+          return str(output_path)
+
+@pytest.fixture()
+def exclude_datasrc(tile_ll, osr_spatialreference):
+     driver = ogr.GetDriverByName('Memory')
+     datasrc = driver.CreateDataSource('exclude')
+     layer = datasrc.CreateLayer('exclude_polygons', osr_spatialreference, ogr.wkbPolygon)
      layer_defn = layer.GetLayerDefn()
      polygons_xyz = [
           np.array([
@@ -128,20 +182,20 @@ def mask_datasrc(tile_ll, osr_spatialreference):
      return datasrc
 
 @pytest.fixture(params=[False, True])
-def mask_datasrc_opt(request, mask_datasrc):
+def exclude_datasrc_opt(request, exclude_datasrc):
      if request.param:
-          return mask_datasrc
+          return exclude_datasrc
      else:
           return None
 
 @pytest.fixture()
-def mask_file(mask_datasrc_opt, tmp_path):
-     if mask_datasrc_opt is None:
+def exclude_file(exclude_datasrc_opt, tmp_path):
+     if exclude_datasrc_opt is None:
           return None
      else:
           output_driver = ogr.GetDriverByName('GPKG')
-          output_path = tmp_path / "mask.gpkg"
-          output_driver.CopyDataSource(mask_datasrc_opt, output_path)
+          output_path = tmp_path / "exclude.gpkg"
+          output_driver.CopyDataSource(exclude_datasrc_opt, output_path)
           return str(output_path)
 
 @pytest.fixture()
@@ -153,8 +207,8 @@ def dataset(gdal_driver):
      gdal_driver.Create('point_density')
 
 @pytest.fixture()
-def expected_raster(return_kind, mask_datasrc_opt):
-     if mask_datasrc_opt is None:
+def expected_raster(return_kind, exclude_datasrc_opt):
+     if exclude_datasrc_opt is None:
           match return_kind:
                case ReturnKind.ALL:
                     grid = np.array([[4e-6, 8e-6], [0, 4e-6]])
@@ -170,6 +224,7 @@ def expected_raster(return_kind, mask_datasrc_opt):
                     grid = np.array([[4e-6, NODATA_VALUE]])
                case ReturnKind.LAST:
                     grid = np.array([[4e-6, NODATA_VALUE], [NODATA_VALUE, 4e-6]])
+
      return grid
 
 @pytest.fixture()
