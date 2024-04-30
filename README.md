@@ -30,7 +30,7 @@ per raster cell. The spatial extent is automatically computed. The command to
 use is:
 
 ```
-point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclude EXCLUDE] [--print-stats] input_las output_raster
+point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--include INCLUDE] [--exclude EXCLUDE] [--print-stats] input_las output_raster
 ```
 
 | Parameter | Description |
@@ -41,7 +41,7 @@ point_density [-h] [--cell-size CELL_SIZE] [--returns {ALL,FIRST,LAST}] [--exclu
 | `--returns {ALL,FIRST,LAST}` | Consider only points with these return numbers. Note that some pointcloud software regards "only" returns as distinct from "first" and "last" returns, which is not the case here (i.e., "only" returns count both as "first" and "last" with this tool). |
 | `--include INCLUDE` | Optional inclusion mask, intended for enforcing a particular tile footprint. Must be an OGR-readable datasource with a single layer |
 | `--exclude EXCLUDE` | Optional exclusion mask for lakes etc. Must be an OGR-readable datasource with a single layer |
-| `--print-stats` | Print density statistics to standard output |
+| `--print-stats` | Print density statistics to standard output. Will be formatted as a JSON object |
 | `-h` | Print help and exit |
 
 ## Example
