@@ -53,9 +53,15 @@ per square meter in each cell:
 point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --exclude dk_lakes.gpkg
 ```
 
+Same, but with an inclusion mask to delimit tile footprint:
+
+```
+point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --include 1km_1234_567_tile.gpkg --exclude dk_lakes.gpkg
+```
+
 Same, but with output statistics printed to stdout and redirected to a text
 file:
 
 ```
-point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --exclude dk_lakes.gpkg --print-stats > 1km_1234_567_stats.txt
+point_density 1km_1234_567.laz 1km_1234_567_density.tif --cell-size 10.0 --include 1km_1234_567_tile.gpkg --exclude dk_lakes.gpkg --print-stats > 1km_1234_567_stats.txt
 ```
