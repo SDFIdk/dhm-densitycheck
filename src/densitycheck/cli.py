@@ -10,9 +10,6 @@ import json
 from pathlib import Path
 import sys
 
-# UTF-8 (for box-drawing characters) doesn't seem too reliable on Windows otherwise
-sys.stdout.reconfigure(encoding='utf-8')
-
 gdal.UseExceptions()
 ogr.UseExceptions()
 
