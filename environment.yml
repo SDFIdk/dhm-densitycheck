@@ -2,7 +2,7 @@ name: densitycheck-dev
 channels:
   - conda-forge
 dependencies:
-  - gdal
+  - gdal=3.8.3  # pinned as a workaround for https://github.com/SDFIdk/dhm-densitycheck/issues/22
   - laspy
   - numpy
   - pyproj
